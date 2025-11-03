@@ -54,11 +54,6 @@ This keeps the core checkout logic minimal and shifts promotion complexity into 
 - Extensibility: Add new promotions by implementing `OfferRule` without touching `Checkout`.
 - Predictability: Rules run over the same immutable view of items and return an explicit discount value. This avoids hidden state and makes testing straightforward.
 
-## Assumptions & Trade‑offs
-- Rules are additive and independent: discounts are summed. If two rules target the same SKU in conflicting ways, you must encode precedence within a single rule or introduce a higher‑level rule that coordinates them.
-- Rounding occurs at the very end to 2 decimals (`services/Checkout.ts`).
-- Catalog is in‑memory for simplicity; a real system would back this with a database/service.
-
 ## Getting Started
 Requirements: Node 18+.
 
