@@ -1,5 +1,5 @@
-import { OfferRule } from "./models/OfferRule";
-import { AllProducts } from "./AllProducts";
+import { OfferRule } from "../models/OfferRule";
+import { AllProducts } from "../data/AllProducts";
 
 const priceOf = (sku: string): number => AllProducts[sku].price;
 const sumRaw = (items: string[]): number => items.reduce((acc, sku) => acc + priceOf(sku), 0);

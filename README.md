@@ -4,9 +4,9 @@
 This project implements a simple point‑of‑sale checkout in TypeScript that supports composable pricing rules. Items are scanned by SKU, and the final price is computed by summing base prices and subtracting discounts contributed by each rule.
 
 - Entry point: `index.ts`
-- Core engine: `Checkout.ts`
-- Rules: `OfferRules.ts` implementing `models/OfferRule.ts`
-- Products catalog: `AllProducts.ts`
+- Core engine: `services/Checkout.ts`
+- Rules: `services/OfferRules.ts` implementing `models/OfferRule.ts`
+- Products catalog: `data/AllProducts.ts`
 - Tests: `__tests__/checkout.test.ts`
 
 ## Problem Statement
@@ -29,25 +29,24 @@ The design separates concerns between scanning items, pricing rules, and product
   - `OfferRule` exposes a single `discount(items: string[]): number` method (`models/OfferRule.ts:1`)
   - Rules are order‑independent and can be combined as long as their semantics don’t conflict
 - Validation
-  - `scan` validates that the SKU exists in the catalog and throws on unknown SKUs (`Checkout.ts:9`)
+  - `scan` validates that the SKU exists in the catalog and throws on unknown SKUs (`services/Checkout.ts`)
 
 This keeps the core checkout logic minimal and shifts promotion complexity into independent rule objects.
 
 ## Key Files
-- `Checkout.ts:16` — Computes base, aggregates discounts, and returns the final total.
-- `OfferRules.ts:8` — `ThreeForTwoRule`: for every 3 matching SKUs, one is free.
-- `OfferRules.ts:21` — `BulkDiscountRule`: if quantity is greater than a threshold, reduce unit price for all matching items.
-- `AllProducts.ts:3` — In‑memory catalog keyed by SKU.
-- `index.ts:13` — Example wiring: construct rules, scan items, print total.
+- `services/Checkout.ts` — Computes base, aggregates discounts, and returns the final total.
+- `services/OfferRules.ts` — `ThreeForTwoRule` and `BulkDiscountRule` implementations.
+- `data/AllProducts.ts` — In‑memory catalog keyed by SKU.
+- `index.ts` — Example wiring: construct rules, scan items, print total.
 
 ## How It Works
 1. Construct checkout with a list of rules:
    - `new ThreeForTwoRule("atv")`
    - `new BulkDiscountRule("ipd", 4, 499.99)`
-2. Call `scan(sku)` for each item; unknown SKUs are rejected (`Checkout.ts:10`).
+2. Call `scan(sku)` for each item; unknown SKUs are rejected (`services/Checkout.ts`).
 3. Call `total()` to compute:
    - Base = sum of product prices
-   - Discount = sum of `rule.discount(items)` across all rules (`Checkout.ts:20`)
+   - Discount = sum of `rule.discount(items)` across all rules (`services/Checkout.ts`)
    - Final = Base − Discount (rounded to 2 decimals)
 
 ## Why This Approach
@@ -57,7 +56,7 @@ This keeps the core checkout logic minimal and shifts promotion complexity into 
 
 ## Assumptions & Trade‑offs
 - Rules are additive and independent: discounts are summed. If two rules target the same SKU in conflicting ways, you must encode precedence within a single rule or introduce a higher‑level rule that coordinates them.
-- Rounding occurs at the very end to 2 decimals (`Checkout.ts:22`).
+- Rounding occurs at the very end to 2 decimals (`services/Checkout.ts`).
 - Catalog is in‑memory for simplicity; a real system would back this with a database/service.
 
 ## Getting Started
@@ -85,7 +84,7 @@ Unit tests cover the assignment scenarios and edge cases:
 ## Adding New Rules
 Create a new class that implements `OfferRule` and add it to the rules list when constructing `Checkout`.
 
-Example: a simple “Buy X Get Y Free” for the same SKU could compute the number of free units from quantities and return `freeUnits * unitPrice` as the discount, mirroring `ThreeForTwoRule` (`OfferRules.ts:8`).
+Example: a simple “Buy X Get Y Free” for the same SKU could compute the number of free units from quantities and return `freeUnits * unitPrice` as the discount, mirroring `ThreeForTwoRule` (see `services/OfferRules.ts`).
 
 Example: a bundle discount (e.g., buy `mbp` get `vga` free) could:
 - Count pairs of `mbp` and `vga`
@@ -93,17 +92,11 @@ Example: a bundle discount (e.g., buy `mbp` get `vga` free) could:
 
 ## Folder Structure
 - `index.ts` — Example usage / manual run
-- `Checkout.ts` — Checkout engine (scan, total)
-- `OfferRules.ts` — Concrete rule implementations
+- `services/Checkout.ts` — Checkout engine (scan, total)
+- `services/OfferRules.ts` — Concrete rule implementations
 - `models/OfferRule.ts` — Rule interface
 - `models/Product.ts` — Product model
-- `AllProducts.ts` — Product catalog
+- `data/AllProducts.ts` — Product catalog
 - `__tests__/checkout.test.ts` — Jest tests
 - `jest.config.js`, `tsconfig.json`, `package.json` — Tooling
-
-## Future Improvements
-- Add a rule coordinator to manage precedence and prevent conflicting discounts on the same line
-- Add a pricing context to carry per‑rule data (e.g., per‑SKU subtotals) without recomputation
-- Introduce a plug‑in registry for rules and serialized configuration
-- Support localized currency formatting and tax rules
 

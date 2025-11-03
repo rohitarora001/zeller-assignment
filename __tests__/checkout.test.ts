@@ -1,5 +1,5 @@
-import { Checkout } from "../Checkout";
-import { ThreeForTwoRule, BulkDiscountRule } from "../OfferRules";
+import { Checkout } from "../services/Checkout";
+import { ThreeForTwoRule, BulkDiscountRule } from "../services/OfferRules";
 
 describe("Checkout pricing rules", () => {
   test("Test 1: atv 3-for-2 with vga", () => {
@@ -32,4 +32,3 @@ describe("Checkout pricing rules", () => {
     expect(co.total()).toBeCloseTo(expected, 2);
   });
 });
-

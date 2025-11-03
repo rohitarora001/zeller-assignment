@@ -1,5 +1,5 @@
-import { AllProducts } from "./AllProducts";
-import { OfferRule } from "./models/OfferRule";
+import { AllProducts } from "../data/AllProducts";
+import { OfferRule } from "../models/OfferRule";
 
 export class Checkout {
   private items: string[] = [];

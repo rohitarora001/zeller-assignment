@@ -1,4 +1,4 @@
-import { Product } from "./models/Product";
+import { Product } from "../models/Product";
 
 export const AllProducts: Readonly<Record<string, Product>> = {
   ipd: { sku: "ipd", name: "Super iPad", price: 549.99 },

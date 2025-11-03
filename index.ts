@@ -1,5 +1,5 @@
-import { Checkout } from "./Checkout";
-import { ThreeForTwoRule, BulkDiscountRule } from "./OfferRules";
+import { Checkout } from "./services/Checkout";
+import { ThreeForTwoRule, BulkDiscountRule } from "./services/OfferRules";
 
 interface CheckoutRequest {
   items: string[];
